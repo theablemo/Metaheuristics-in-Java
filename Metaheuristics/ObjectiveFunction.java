@@ -1,4 +1,4 @@
-package Metaheuristics.GEO;
+package Metaheuristics;
 
 public class ObjectiveFunction {
     public double evaluate(double[] sth) {

@@ -1,6 +1,6 @@
-package Metaheuristics.AVOA;
+package Metaheuristics.AVOA.HelperMethods;
 
-import static Metaheuristics.AVOA.RouletteWheelSelection.rouletteWheelSelection;
+import static Metaheuristics.AVOA.HelperMethods.RouletteWheelSelection.rouletteWheelSelection;
 
 public class RandomSelection {
     /**

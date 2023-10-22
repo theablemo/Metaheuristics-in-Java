@@ -1,4 +1,4 @@
-package Metaheuristics.AVOA;
+package Metaheuristics.AVOA.HelperMethods;
 
 public class BoundaryCheck {
     /**

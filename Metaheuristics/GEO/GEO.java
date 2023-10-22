@@ -1,31 +1,18 @@
 package Metaheuristics.GEO;
 
+import Metaheuristics.ObjectiveFunction;
+
 import java.util.Arrays;
 import java.util.Random;
 
-public class GoldenEagleOptimizer {
-    public static class Options {
-        private int populationSize;
-        private int maxIterations;
-        private double[] attackPropensity = { 0.1, 0.9 };
-        private double[] cruisePropensity = { 0.1, 0.9 };
+public class GEO {
 
-        // Getters and Setters
-        public int getPopulationSize() { return populationSize; }
-        public void setPopulationSize(int populationSize) { this.populationSize = populationSize; }
-        public int getMaxIterations() { return maxIterations; }
-        public void setMaxIterations(int maxIterations) { this.maxIterations = maxIterations; }
-        public double[] getAttackPropensity() { return attackPropensity; }
-        public void setAttackPropensity(double lowerBound, double upperBound) {
-            attackPropensity[0] = lowerBound;
-            attackPropensity[1] = upperBound;
-        }
-        public double[] getCruisePropensity() { return cruisePropensity; }
-        public void setCruisePropensity(double lowerBound, double upperBound) {
-            cruisePropensity[0] = lowerBound;
-            cruisePropensity[1] = upperBound;
-        }
-    }
+    private final int varSize;
+    private final int popSize;
+    private final int maxIter;
+    private final ObjectiveFunction fitFunc;
+    private final double[] lb;
+    private final double[] ub;
 
     public static double[] vecNorm(double[][] A, int p, int dim) {
         int numRows = A.length;
@@ -139,17 +126,37 @@ public class GoldenEagleOptimizer {
         return Math.sqrt(sum);
     }
 
-    public static double[] geo(ObjectiveFunction fun, int nvars, double[] lb, double[] ub, Options options) {
-        int populationSize = options.getPopulationSize();
-        int maxIterations = options.getMaxIterations();
+    double[] attackPropensity = new double[]{0.1, 0.9};
+    double[] cruisePropensity = new double[]{0.1, 0.9};
+
+    public double[] getAttackPropensity() {
+        return attackPropensity;
+    }
+
+    public double[] getCruisePropensity() {
+        return cruisePropensity;
+    }
+
+    public GEO(ObjectiveFunction objectiveFunction, int popSize, int varSize, int maxIter, double[] lb, double[] ub){
+        this.popSize = popSize;
+        this.maxIter = maxIter;
+        this.lb = lb;
+        this.ub = ub;
+        this.varSize = varSize;
+        this.fitFunc = objectiveFunction;
+    }
+
+    public double[] run() {
+        int populationSize = popSize;
+        int maxIterations = maxIter;
         double[] convergenceCurve = new double[maxIterations];
 
-        double[][] x = new double[populationSize][nvars];
+        double[][] x = new double[populationSize][varSize];
         Random random = new Random();
 
         // Initialization
         for (int i = 0; i < populationSize; i++) {
-            for (int j = 0; j < nvars; j++) {
+            for (int j = 0; j < varSize; j++) {
                 x[i][j] = lb[j] + random.nextDouble() * (ub[j] - lb[j]);
             }
         }
@@ -157,13 +164,13 @@ public class GoldenEagleOptimizer {
 //        double[] fitnessScores = fun.evaluate(x);
         double[] fitnessScores = new double[x.length];
         for (int i = 0; i < x.length; i++) {
-            fitnessScores[i] = fun.evaluate(x[i]);
+            fitnessScores[i] = fitFunc.evaluate(x[i]);
         }
         double[] flockMemoryF = fitnessScores.clone();
         double[][] flockMemoryX = x.clone();
 
-        double[] attackPropensity = linspace(options.getAttackPropensity()[0], options.getAttackPropensity()[1], maxIterations);
-        double[] cruisePropensity = linspace(options.getCruisePropensity()[0], options.getCruisePropensity()[1], maxIterations);
+        double[] attackPropensity = linspace(getAttackPropensity()[0], getAttackPropensity()[1], maxIterations);
+        double[] cruisePropensity = linspace(getCruisePropensity()[0], getCruisePropensity()[1], maxIterations);
 
         // Main loop
         for (int currentIteration = 0; currentIteration < maxIterations; currentIteration++) {
@@ -171,9 +178,9 @@ public class GoldenEagleOptimizer {
             int[] destinationEagle = shuffleArray(populationSize);
 
             // Calculate AttackVectorInitial
-            double[][] attackVectorInitial = new double[populationSize][nvars];
+            double[][] attackVectorInitial = new double[populationSize][varSize];
             for (int i = 0; i < populationSize; i++) {
-                for (int j = 0; j < nvars; j++) {
+                for (int j = 0; j < varSize; j++) {
                     attackVectorInitial[i][j] = flockMemoryX[destinationEagle[i]][j] - x[i][j];
                 }
             }
@@ -190,9 +197,9 @@ public class GoldenEagleOptimizer {
             }
 
             // Initialize CruiseVectorInitial
-            double[][] cruiseVectorInitial = new double[populationSize][nvars];
+            double[][] cruiseVectorInitial = new double[populationSize][varSize];
             for (int i = 0; i < populationSize; i++) {
-                for (int j = 0; j < nvars; j++) {
+                for (int j = 0; j < varSize; j++) {
                     cruiseVectorInitial[i][j] = 2 * random.nextDouble() - 1; // [-1, 1]
                 }
             }
@@ -206,47 +213,24 @@ public class GoldenEagleOptimizer {
             }
 
             // Determine constrained and free variables
-//            for (int i = 0; i < populationSize; i++) {
-//                if (unconvergedEagles[i]) {
-//                    boolean[] vConstrained = new boolean[nvars];
-//                    int idx = -1;
-//                    for (int j = 0; j < nvars; j++) {
-//                        if (attackVectorInitial[i][j] != 0) {
-//                            idx = j;
-//                            vConstrained[j] = true;
-//                            break;
-//                        }
-//                    }
-//                    boolean[] vFree = new boolean[nvars];
-//                    for (int j = 0; j < nvars; j++) {
-//                        if (j != idx) {
-//                            vFree[j] = true;
-//                        }
-//                    }
-//                    cruiseVectorInitial[i][idx] = -sum(attackVectorInitial[i], vFree) * cruiseVectorInitial[i][idx]
-//                            / attackVectorInitial[i][idx]; // Eq. 4 in paper
-//                }
-//            }
-
-            // Determine constrained and free variables
             for (int i1 = 0; i1 < populationSize; i1++) {
                 if (unconvergedEagles[i1]) {
-                    boolean[] vConstrained = new boolean[nvars];
+                    boolean[] vConstrained = new boolean[varSize];
                     int idx = datasample(attackVectorInitial[i1]);
                     vConstrained[idx] = true;
-                    boolean[] vFree = new boolean[nvars];
-                    for (int j = 0; j < nvars; j++) {
+                    boolean[] vFree = new boolean[varSize];
+                    for (int j = 0; j < varSize; j++) {
                         if (!vConstrained[j]) {
                             vFree[j] = true;
                         }
                     }
                     double sum = 0;
-                    for (int j = 0; j < nvars; j++) {
+                    for (int j = 0; j < varSize; j++) {
                         if (vFree[j]) {
                             sum += attackVectorInitial[i1][j] * cruiseVectorInitial[i1][j];
                         }
                     }
-                    for (int j = 0; j < nvars; j++) {
+                    for (int j = 0; j < varSize; j++) {
                         if (vConstrained[j]) {
                             cruiseVectorInitial[i1][j] = -sum / attackVectorInitial[i1][j]; // (Eq. 4 in paper)
                         }
@@ -257,12 +241,12 @@ public class GoldenEagleOptimizer {
             // Calculate unit vectors
 //            double[][] attackVectorUnit = divide(attackVectorInitial, vecNorm(attackVectorInitial, 2, 2));
 //            double[][] cruiseVectorUnit = divide(cruiseVectorInitial, vecNorm(cruiseVectorInitial, 2, 2));
-            double[][] attackVectorUnit = new double[populationSize][nvars];
-            double[][] cruiseVectorUnit = new double[populationSize][nvars];
+            double[][] attackVectorUnit = new double[populationSize][varSize];
+            double[][] cruiseVectorUnit = new double[populationSize][varSize];
             for (int i = 0; i < populationSize; i++) {
                 double normAttackVectorInitial = vecNorm2(attackVectorInitial[i]);
                 double normCruiseVectorInitial = vecNorm2(cruiseVectorInitial[i]);
-                for (int j = 0; j < nvars; j++) {
+                for (int j = 0; j < varSize; j++) {
                     attackVectorUnit[i][j] = attackVectorInitial[i][j] / normAttackVectorInitial;
                     cruiseVectorUnit[i][j] = cruiseVectorInitial[i][j] / normCruiseVectorInitial;
                 }
@@ -285,39 +269,30 @@ public class GoldenEagleOptimizer {
                 cruiseVector[i] = random.nextDouble() * cruisePropensity[currentIteration] * radius[i] * cruiseVectorUnit[i][0]; // Second term of Eq. 6 in paper
                 stepVector[i] = attackVector[i] + cruiseVector[i];
             }
-//            double[] AttackVector = new double[PopulationSize];
-//            double[] CruiseVector = new double[PopulationSize];
-//            double[] StepVector = new double[PopulationSize];
-//            for (int i = 0; i < PopulationSize; i++) {
-//                AttackVector[i] = random.nextDouble() * AttackPropensity[CurrentIteration] * Radius[i] * VecNorm(AttackVectorUnit[i]);
-//                CruiseVector[i] = random.nextDouble() * CruisePropensity[CurrentIteration] * Radius[i] * VecNorm(CruiseVectorUnit[i]);
-//                StepVector[i] = AttackVector[i] + CruiseVector[i];
-//            }
 
             // Calculate new x
             for (int i = 0; i < populationSize; i++) {
-                for (int j = 0; j < nvars; j++) {
+                for (int j = 0; j < varSize; j++) {
                     x[i][j] += stepVector[i];
                 }
             }
 
             // Enforce bounds
             for (int i = 0; i < populationSize; i++) {
-                for (int j = 0; j < nvars; j++) {
+                for (int j = 0; j < varSize; j++) {
                     x[i][j] = Math.max(lb[j], Math.min(ub[j], x[i][j]));
                 }
             }
 
             // Calculate fitness
-//            fitnessScores = fun.evaluate(x);
             for (int i = 0; i < x.length; i++) {
-                fitnessScores[i] = fun.evaluate(x[i]);
+                fitnessScores[i] = fitFunc.evaluate(x[i]);
             }
             // Update memory
             for (int i = 0; i < populationSize; i++) {
                 if (fitnessScores[i] < flockMemoryF[i]) {
                     flockMemoryF[i] = fitnessScores[i];
-                    for (int j = 0; j < nvars; j++) {
+                    for (int j = 0; j < varSize; j++) {
                         flockMemoryX[i][j] = x[i][j];
                     }
                 }
@@ -330,8 +305,8 @@ public class GoldenEagleOptimizer {
         // Return values
         int fvalIndex = argmin(flockMemoryF);
         double[] fval = flockMemoryF.clone();
-        double[] result = new double[nvars];
-        for (int j = 0; j < nvars; j++) {
+        double[] result = new double[varSize];
+        for (int j = 0; j < varSize; j++) {
             result[j] = flockMemoryX[fvalIndex][j];
         }
 

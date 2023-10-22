@@ -1,4 +1,4 @@
-package Metaheuristics.AVOA;
+package Metaheuristics.AVOA.HelperMethods;
 
 import java.util.Random;
 

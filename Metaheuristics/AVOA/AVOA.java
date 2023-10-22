@@ -1,12 +1,14 @@
 package Metaheuristics.AVOA;
 
+import Metaheuristics.ObjectiveFunction;
+
 import java.util.Random;
 
-import static Metaheuristics.AVOA.BoundaryCheck.boundaryCheck;
-import static Metaheuristics.AVOA.Exploitation.exploitation;
-import static Metaheuristics.AVOA.Exploration.exploration;
-import static Metaheuristics.AVOA.Initialization.initialization;
-import static Metaheuristics.AVOA.RandomSelection.randomSelect;
+import static Metaheuristics.AVOA.HelperMethods.BoundaryCheck.boundaryCheck;
+import static Metaheuristics.AVOA.HelperMethods.Exploitation.exploitation;
+import static Metaheuristics.AVOA.HelperMethods.Exploration.exploration;
+import static Metaheuristics.AVOA.HelperMethods.Initialization.initialization;
+import static Metaheuristics.AVOA.HelperMethods.RandomSelection.randomSelect;
 
 public class AVOA {
     /**

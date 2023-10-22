@@ -1,4 +1,6 @@
 package Metaheuristics.AVOA;
+import Metaheuristics.ObjectiveFunction;
+
 import static Metaheuristics.AVOA.AVOA.AVOA;
 
 import java.util.Arrays;
