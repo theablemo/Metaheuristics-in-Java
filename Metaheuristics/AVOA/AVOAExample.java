@@ -1,8 +1,6 @@
 package Metaheuristics.AVOA;
 import Metaheuristics.ObjectiveFunction;
 
-import static Metaheuristics.AVOA.AVOA.AVOA;
-
 import java.util.Arrays;
 
 public class AVOAExample {
@@ -19,10 +17,12 @@ public class AVOAExample {
         double[] upper_bound = new double[variables_no];
         Arrays.fill(upper_bound, 100);
 
-        Object[] result = AVOA(pop_size, max_iter, lower_bound, upper_bound, variables_no, fobj);
-        double Best_vulture1_F = (double) result[0];
-        double[] Best_vulture1_X = (double[]) result[1];
-        double[] convergence_curve = (double[]) result[2];
+        AVOA avoa = new AVOA(pop_size, max_iter, lower_bound, upper_bound, variables_no, fobj);
+
+        double[] result = avoa.run();
+//        double Best_vulture1_F = (double) result[0];
+        double[] Best_vulture1_X = result;
+//        double[] convergence_curve = (double[]) result[2];
 
         // Best optimal values for the decision variables
         // parallelcoords(Best_vulture1_X)
@@ -34,9 +34,9 @@ public class AVOAExample {
         // Best convergence curve
         // plot(convergence_curve);
         System.out.println("\nConvergence curve of AVOA:");
-        for (double value : convergence_curve) {
-            System.out.println(value);
-        }
+//        for (double value : convergence_curve) {
+//            System.out.println(value);
+//        }
     }
 
 }
