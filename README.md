@@ -13,7 +13,7 @@ Matlab implementation: https://www.mathworks.com/matlabcentral/fileexchange/8443
    Mohammad Dehghani and Pavel Trojovský https://doi.org/10.3389/fmech.2022.1126450 </br> 
    Matlab implementation: https://www.mathworks.com/matlabcentral/fileexchange/124555-osprey-optimization-algorithm </br>
 4. Artificial gorilla troops optimizer: A new nature-inspired metaheuristic algorithm for global optimization problems
-   Benyamin Abdollahzadeh, Farhad Soleimanian Gharehchopogh, Seyedali Mirjalili
+   Benyamin Abdollahzadeh, Farhad Soleimanian Gharehchopogh, Seyedali Mirjalili https://doi.org/10.1002/int.22535
    Matlab implementation: https://www.mathworks.com/matlabcentral/fileexchange/95953-artificial-gorilla-troops-optimizer?s_tid=mwa_osa_a
    
 
